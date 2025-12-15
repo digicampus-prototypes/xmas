@@ -182,6 +182,18 @@
         mouse.y = e.touches[0].clientY;
     });
 
+    // --- RICKROLL BYTEBEAT LOGIC ---
+    const musicParse = function(f) {
+        // This generates a WAV file string from the formula
+        return eval("for(var t=0,S='RIFF_oO_WAVEfmt " + atob('EAAAAAEAAQBAHwAAQB8AAAEACAA') + "data';++t<3e5;)S+=String.fromCharCode(" + f + ")");
+    };
+
+    const playLowFiRickroll = function() {
+        const formula = '(t<<3)*[8/9,1,9/8,6/5,4/3,3/2,0][[0xd2d2c8,0xce4088,0xca32c8,0x8e4009][t>>14&3]>>(0x3dbe4688>>((t>>10&15)>9?18:t>>10&15)*3&7)*3&7]&255';
+        const audio = new Audio("data:audio/wav;base64," + (btoa(musicParse(formula))));
+        audio.play();
+    };
+
     // --- UI LOGIC ---
     function revealWish() {
         const nameInput = document.getElementById('nameInput');
@@ -189,34 +201,35 @@
         
         if (!name) name = "Friend"; // Fallback if empty
 
-        // 1 in 21 Chance of a Rickroll
-        // Generating a random number between 0 and 20. If it hits 0, we rickroll.
-        if (Math.floor(Math.random() * 21) === 0) {
-             window.location.href = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-             return;
-        }
-
         // 1. Hide Input
         inputContainer.style.opacity = '0';
         setTimeout(() => {
             inputContainer.style.display = 'none';
+
+            // 1 in 21 Chance of a Rickroll (Audio)
+            // We do this check AFTER hiding the input so the user sees the change
+            if (Math.floor(Math.random() * 20) === 0) {
+                 playLowFiRickroll();
+                 wishDisplay.innerHTML = "Never gonna give you up... 🎵";
+                 wishDisplay.style.display = 'block';
+                 wishDisplay.style.opacity = '1';
+                 return;
+            }
+
+            // Normal Wish Logic
+            const randomIndex = Math.floor(Math.random() * wishes.length);
+            let selectedWish = wishes[randomIndex];
+            selectedWish = selectedWish.replace("{name}", `<span class="highlight">${name}</span>`);
+
+            wishDisplay.innerHTML = selectedWish;
+            wishDisplay.style.display = 'block';
+            
+            // Small delay for drama before fading in
+            setTimeout(() => {
+                wishDisplay.style.opacity = '1';
+            }, 100);
+
         }, 500);
-
-        // 2. Select Random Wish
-        const randomIndex = Math.floor(Math.random() * wishes.length);
-        let selectedWish = wishes[randomIndex];
-        
-        // 3. Personalize
-        selectedWish = selectedWish.replace("{name}", `<span class="highlight">${name}</span>`);
-
-        // 4. Display Wish
-        wishDisplay.innerHTML = selectedWish;
-        wishDisplay.style.display = 'block';
-        
-        // Small delay for drama before fading in
-        setTimeout(() => {
-            wishDisplay.style.opacity = '1';
-        }, 600);
     }
 
 
