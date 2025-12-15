@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- crucial for mobile -->
@@ -9,8 +8,7 @@
         body {
             margin: 0;
             overflow: hidden;
-            background-color: #050510;
-            /* Deep GovTech dark */
+            background-color: #050510; /* Deep GovTech dark */
             display: flex;
             justify-content: center;
             align-items: center;
@@ -18,7 +16,6 @@
             font-family: 'Courier New', Courier, monospace;
             color: #00F0FF;
         }
-
         canvas {
             display: block;
             position: absolute;
@@ -26,7 +23,7 @@
             left: 0;
             z-index: 1;
         }
-
+        
         /* UI Layer for Input and Wish */
         #ui-layer {
             position: relative;
@@ -92,16 +89,13 @@
 
         /* The Wish Display */
         #wish-display {
-            display: none;
-            /* Hidden initially */
-            margin-top: 30vh;
-            /* Push it down below the canvas text */
+            display: none; /* Hidden initially */
+            margin-top: 30vh; /* Push it down below the canvas text */
             font-size: 18px;
             line-height: 1.6;
             color: white;
             text-shadow: 0 0 5px rgba(0, 240, 255, 0.5);
-            pointer-events: none;
-            /* Let clicks pass through to canvas */
+            pointer-events: none; /* Let clicks pass through to canvas */
             opacity: 0;
             transition: opacity 2s ease;
             padding: 0 20px;
@@ -113,298 +107,307 @@
         }
     </style>
 </head>
-
 <body>
 
-    <canvas id="canvas"></canvas>
+<canvas id="canvas"></canvas>
 
-    <div id="ui-layer">
-        <!-- Input Section -->
-        <div id="input-container">
-            <h1>Welcome to Digicampus</h1>
-            <input type="text" id="nameInput" placeholder="Enter your name" autocomplete="off">
-            <br>
-            <button onclick="revealWish()">Unlock Winter Wish</button>
-        </div>
-
-        <!-- Wish Section -->
-        <div id="wish-display"></div>
+<div id="ui-layer">
+    <!-- Input Section -->
+    <div id="input-container">
+        <h1>Welcome to Digicampus</h1>
+        <input type="text" id="nameInput" placeholder="Enter your name" autocomplete="off">
+        <br>
+        <button onclick="revealWish()">Unlock Winter Wish</button>
     </div>
 
-    <script>
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const uiLayer = document.getElementById('ui-layer');
-        const inputContainer = document.getElementById('input-container');
-        const wishDisplay = document.getElementById('wish-display');
+    <!-- Wish Section -->
+    <div id="wish-display"></div>
+</div>
 
-        let particles = [];
-        let snowParticles = [];
-        let width, height;
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const uiLayer = document.getElementById('ui-layer');
+    const inputContainer = document.getElementById('input-container');
+    const wishDisplay = document.getElementById('wish-display');
 
-        // Pool of 20 Personal-ish Winter Wishes
-        const wishes = [
-            "Wishing you a season of recharging your biological batteries, {name}.",
-            "{name}, may your code be bug-free and your holidays stress-free.",
-            "Here’s to a new year of breakthrough insights and zero merge conflicts, {name}.",
-            "{name}, may your 2026 be as resilient and dynamic as a distributed network.",
-            "Wishing you connection, collaboration, and calm this winter, {name}.",
-            "{name}, may you find time to slow down and engineer some happiness this season.",
-            "Wishing you a prosperous new year with high uptime and low stress, {name}.",
-            "May your holidays be as bright as a well-optimized display, {name}.",
-            "{name}, sending you data-driven proof that you deserve a great break.",
-            "Wishing you a season of innovation and warm connections, {name}.",
-            "{name}, may your days be merry and your systems secure.",
-            "Here’s to unhurried moments and future-proof memories, {name}.",
-            "Wishing you clarity, purpose, and peace in the new year, {name}.",
-            "{name}, take this time to debug your mind and refresh your spirit.",
-            "May the new year bring you impactful projects and joyful pauses, {name}.",
-            "Wishing you a holiday season with optimal throughput of joy, {name}.",
-            "{name}, may your bandwidth for happiness be unlimited this year.",
-            "Here’s to smart solutions and warm traditions, {name}.",
-            "Wishing you a sustainable and scalable year of success, {name}.",
-            "{name}, may you upgrade your downtime this holiday season."
-        ];
+    let particles = [];
+    let snowParticles = [];
+    let width, height;
+    
+    // Pool of 20 Personal-ish Winter Wishes
+    const wishes = [
+        "Wishing you a season of recharging your biological batteries, {name}.",
+        "{name}, may your code be bug-free and your holidays stress-free.",
+        "Here’s to a new year of breakthrough insights and zero merge conflicts, {name}.",
+        "{name}, may your 2026 be as resilient and dynamic as a distributed network.",
+        "Wishing you connection, collaboration, and calm this winter, {name}.",
+        "{name}, may you find time to slow down and engineer some happiness this season.",
+        "Wishing you a prosperous new year with high uptime and low stress, {name}.",
+        "May your holidays be as bright as a well-optimized display, {name}.",
+        "{name}, sending you data-driven proof that you deserve a great break.",
+        "Wishing you a season of innovation and warm connections, {name}.",
+        "{name}, may your days be merry and your systems secure.",
+        "Here’s to unhurried moments and future-proof memories, {name}.",
+        "Wishing you clarity, purpose, and peace in the new year, {name}.",
+        "{name}, take this time to debug your mind and refresh your spirit.",
+        "May the new year bring you impactful projects and joyful pauses, {name}.",
+        "Wishing you a holiday season with optimal throughput of joy, {name}.",
+        "{name}, may your bandwidth for happiness be unlimited this year.",
+        "Here’s to smart solutions and warm traditions, {name}.",
+        "Wishing you a sustainable and scalable year of success, {name}.",
+        "{name}, may you upgrade your downtime this holiday season."
+    ];
 
-        // Configuration
-        const config = {
-            text: "Digicampus",
-            color: '#00F0FF', // Tech Blue
-            pixelSize: 4,     // Size of the 'pixels'
-            gap: 5,           // Spacing for sampling (create the grid look)
-            mouseRadius: 50,
-            textBaseY: 0
-        };
+    // Configuration
+    const config = {
+        text: "Digicampus",
+        color: '#00F0FF', // Tech Blue
+        pixelSize: 4,     // Size of the 'pixels'
+        gap: 5,           // Spacing for sampling (create the grid look)
+        mouseRadius: 50,
+        textBaseY: 0
+    };
 
-        // Mouse interaction
-        const mouse = { x: null, y: null };
-        window.addEventListener('mousemove', (e) => {
-            mouse.x = e.x;
-            mouse.y = e.y;
-        });
+    // Mouse interaction
+    const mouse = { x: null, y: null };
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = e.x;
+        mouse.y = e.y;
+    });
+    
+    // Also handle touch for mobile
+    window.addEventListener('touchmove', (e) => {
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+    });
 
-        // Also handle touch for mobile
-        window.addEventListener('touchmove', (e) => {
-            mouse.x = e.touches[0].clientX;
-            mouse.y = e.touches[0].clientY;
-        });
+    // --- UI LOGIC ---
+    function revealWish() {
+        const nameInput = document.getElementById('nameInput');
+        let name = nameInput.value.trim();
+        
+        if (!name) name = "Friend"; // Fallback if empty
 
-        // --- UI LOGIC ---
-        function revealWish() {
-            const nameInput = document.getElementById('nameInput');
-            let name = nameInput.value.trim();
-
-            if (!name) name = "Friend"; // Fallback if empty
-
-            // 1. Hide Input
-            inputContainer.style.opacity = '0';
-            setTimeout(() => {
-                inputContainer.style.display = 'none';
-            }, 500);
-
-            // 2. Select Random Wish
-            const randomIndex = Math.floor(Math.random() * wishes.length);
-            let selectedWish = wishes[randomIndex];
-
-            // 3. Personalize
-            selectedWish = selectedWish.replace("{name}", `<span class="highlight">${name}</span>`);
-
-            // 4. Display Wish
-            wishDisplay.innerHTML = selectedWish;
-            wishDisplay.style.display = 'block';
-
-            // Small delay for drama before fading in
-            setTimeout(() => {
-                wishDisplay.style.opacity = '1';
-            }, 600);
+        // 1 in 21 Chance of a Rickroll
+        // Generating a random number between 0 and 20. If it hits 0, we rickroll.
+        if (Math.floor(Math.random() * 21) === 0) {
+             window.location.href = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+             return;
         }
 
+        // 1. Hide Input
+        inputContainer.style.opacity = '0';
+        setTimeout(() => {
+            inputContainer.style.display = 'none';
+        }, 500);
 
-        // --- CANVAS LOGIC ---
+        // 2. Select Random Wish
+        const randomIndex = Math.floor(Math.random() * wishes.length);
+        let selectedWish = wishes[randomIndex];
+        
+        // 3. Personalize
+        selectedWish = selectedWish.replace("{name}", `<span class="highlight">${name}</span>`);
 
-        class Particle {
-            constructor(x, y, color) {
-                this.x = Math.random() * width; // Start scattered
-                this.y = Math.random() * height;
-                this.originX = x;
-                this.originY = y;
-                this.color = color;
-                this.size = config.pixelSize;
-                this.vx = 0;
-                this.vy = 0;
-                this.friction = 0.90;
-                this.ease = 0.15;
-                this.dx = 0;
-                this.dy = 0;
-                this.distance = 0;
-                this.force = 0;
-                this.angle = 0;
-            }
+        // 4. Display Wish
+        wishDisplay.innerHTML = selectedWish;
+        wishDisplay.style.display = 'block';
+        
+        // Small delay for drama before fading in
+        setTimeout(() => {
+            wishDisplay.style.opacity = '1';
+        }, 600);
+    }
 
-            draw() {
-                ctx.fillStyle = this.color;
-                ctx.fillRect(this.x, this.y, this.size, this.size);
-            }
 
-            update() {
-                // physics to return to origin
-                this.dx = mouse.x - this.x;
-                this.dy = mouse.y - this.y;
-                this.distance = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
+    // --- CANVAS LOGIC ---
 
-                // Mouse interaction (repel)
-                if (this.distance < config.mouseRadius) {
-                    this.force = -config.mouseRadius / this.distance;
-                    this.angle = Math.atan2(this.dy, this.dx);
-                    this.vx += this.force * Math.cos(this.angle) * 2;
-                    this.vy += this.force * Math.sin(this.angle) * 2;
-                }
-
-                // Return to home position (Homeostasis)
-                this.x += (this.originX - this.x) * this.ease;
-                this.y += (this.originY - this.y) * this.ease;
-
-                // Add velocity
-                this.x += this.vx;
-                this.y += this.vy;
-
-                // Friction
-                this.vx *= this.friction;
-                this.vy *= this.friction;
-
-                // Slight organic shimmer
-                if (Math.random() > 0.98) {
-                    this.x += (Math.random() - 0.5) * 2;
-                }
-
-                this.draw();
-            }
+    class Particle {
+        constructor(x, y, color) {
+            this.x = Math.random() * width; // Start scattered
+            this.y = Math.random() * height;
+            this.originX = x;
+            this.originY = y;
+            this.color = color;
+            this.size = config.pixelSize;
+            this.vx = 0;
+            this.vy = 0;
+            this.friction = 0.90;
+            this.ease = 0.15;
+            this.dx = 0;
+            this.dy = 0;
+            this.distance = 0;
+            this.force = 0;
+            this.angle = 0;
         }
 
-        class Snow {
-            constructor() {
+        draw() {
+            ctx.fillStyle = this.color;
+            ctx.fillRect(this.x, this.y, this.size, this.size);
+        }
+
+        update() {
+            // physics to return to origin
+            this.dx = mouse.x - this.x;
+            this.dy = mouse.y - this.y;
+            this.distance = Math.sqrt(this.dx * this.dx + this.dy * this.dy);
+            
+            // Mouse interaction (repel)
+            if (this.distance < config.mouseRadius) {
+                this.force = -config.mouseRadius / this.distance;
+                this.angle = Math.atan2(this.dy, this.dx);
+                this.vx += this.force * Math.cos(this.angle) * 2;
+                this.vy += this.force * Math.sin(this.angle) * 2;
+            }
+
+            // Return to home position (Homeostasis)
+            this.x += (this.originX - this.x) * this.ease;
+            this.y += (this.originY - this.y) * this.ease;
+
+            // Add velocity
+            this.x += this.vx;
+            this.y += this.vy;
+
+            // Friction
+            this.vx *= this.friction;
+            this.vy *= this.friction; 
+
+            // Slight organic shimmer
+            if (Math.random() > 0.98) {
+                this.x += (Math.random() - 0.5) * 2;
+            }
+
+            this.draw();
+        }
+    }
+
+    class Snow {
+        constructor() {
+            this.reset();
+        }
+        
+        reset() {
+            this.x = Math.random() * width;
+            this.y = Math.random() * height - height;
+            this.size = Math.random() * 3 + 1;
+            this.speed = Math.random() * 2 + 0.5;
+            this.drift = (Math.random() - 0.5) * 0.5;
+        }
+
+        update() {
+            this.y += this.speed;
+            this.x += this.drift;
+
+            if (this.y > height) {
                 this.reset();
             }
+            
+            ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+            ctx.fillRect(this.x, this.y, this.size, this.size);
+        }
+    }
 
-            reset() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * height - height;
-                this.size = Math.random() * 3 + 1;
-                this.speed = Math.random() * 2 + 0.5;
-                this.drift = (Math.random() - 0.5) * 0.5;
-            }
+    function init() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+        
+        // Fix for IndexSizeError: Safety check for zero dimensions
+        if (width <= 0 || height <= 0) return;
 
-            update() {
-                this.y += this.speed;
-                this.x += this.drift;
+        particles = [];
+        snowParticles = [];
 
-                if (this.y > height) {
-                    this.reset();
-                }
-
-                ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-                ctx.fillRect(this.x, this.y, this.size, this.size);
-            }
+        // Setup Snow
+        for(let i = 0; i < 150; i++) {
+            snowParticles.push(new Snow());
         }
 
-        function init() {
-            width = canvas.width = window.innerWidth;
-            height = canvas.height = window.innerHeight;
-            particles = [];
-            snowParticles = [];
+        // Setup Text Scan
+        ctx.fillStyle = 'white';
+        // Responsive font: slightly smaller to ensure fit on mobile
+        const fontSize = Math.min(width / 8, 120); 
+        ctx.font = `900 ${fontSize}px Arial`; 
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        // Move text UP slightly to make room for the wish below
+        config.textBaseY = height * 0.4; 
+        
+        // Draw standard text to scan
+        ctx.fillText(config.text, width / 2, config.textBaseY);
+        
+        // Scan the canvas
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        ctx.clearRect(0, 0, width, height); 
 
-            // Setup Snow
-            for (let i = 0; i < 150; i++) {
-                snowParticles.push(new Snow());
-            }
+        // Iterate through pixel data
+        for (let y = 0; y < height; y += config.gap) {
+            for (let x = 0; x < width; x += config.gap) {
+                const index = (y * width + x) * 4;
+                const alpha = data[index + 3];
 
-            // Setup Text Scan
-            ctx.fillStyle = 'white';
-            // Responsive font: slightly smaller to ensure fit on mobile
-            const fontSize = Math.min(width / 8, 120);
-            ctx.font = `900 ${fontSize}px Arial`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-
-            // Move text UP slightly to make room for the wish below
-            config.textBaseY = height * 0.4;
-
-            // Draw standard text to scan
-            ctx.fillText(config.text, width / 2, config.textBaseY);
-
-            // Scan the canvas
-            const imageData = ctx.getImageData(0, 0, width, height);
-            const data = imageData.data;
-            ctx.clearRect(0, 0, width, height);
-
-            // Iterate through pixel data
-            for (let y = 0; y < height; y += config.gap) {
-                for (let x = 0; x < width; x += config.gap) {
-                    const index = (y * width + x) * 4;
-                    const alpha = data[index + 3];
-
-                    if (alpha > 128) {
-                        particles.push(new Particle(x, y, config.color));
-                    }
-                }
-            }
-
-            // Add Hat
-            const textWidth = ctx.measureText(config.text).width;
-            const startX = (width / 2) - (textWidth / 2);
-            const hatBaseX = startX + (fontSize * 0.1);
-            const hatBaseY = config.textBaseY - (fontSize * 0.35);
-
-            addHatPixels(hatBaseX, hatBaseY, fontSize);
-        }
-
-        function addHatPixels(bx, by, size) {
-            const hatMap = [
-                [0, 0, 0, 2, 0, 0, 0, 0],
-                [0, 0, 2, 1, 2, 0, 0, 0],
-                [0, 0, 0, 1, 1, 0, 0, 0],
-                [0, 0, 0, 1, 1, 1, 0, 0],
-                [0, 0, 1, 1, 1, 1, 0, 0],
-                [0, 1, 1, 1, 1, 1, 0, 0],
-                [2, 2, 2, 2, 2, 2, 2, 2],
-                [2, 2, 2, 2, 2, 2, 2, 2]
-            ];
-
-            for (let r = 0; r < hatMap.length; r++) {
-                for (let c = 0; c < hatMap[r].length; c++) {
-                    const val = hatMap[r][c];
-                    if (val !== 0) {
-                        const pX = bx + (c * config.gap * 2);
-                        const pY = by - (hatMap.length * config.gap * 2) + (r * config.gap * 2);
-
-                        const color = val === 1 ? '#FF2244' : '#FFFFFF';
-                        // Cluster for chunkiness
-                        particles.push(new Particle(pX, pY, color));
-                        particles.push(new Particle(pX + config.gap, pY, color));
-                        particles.push(new Particle(pX, pY + config.gap, color));
-                        particles.push(new Particle(pX + config.gap, pY + config.gap, color));
-                    }
+                if (alpha > 128) {
+                    particles.push(new Particle(x, y, config.color));
                 }
             }
         }
 
-        function animate() {
-            ctx.fillStyle = 'rgba(5, 5, 16, 0.4)';
-            ctx.fillRect(0, 0, width, height);
+        // Add Hat
+        const textWidth = ctx.measureText(config.text).width;
+        const startX = (width / 2) - (textWidth / 2);
+        const hatBaseX = startX + (fontSize * 0.1); 
+        const hatBaseY = config.textBaseY - (fontSize * 0.35); 
 
-            snowParticles.forEach(snow => snow.update());
-            particles.forEach(p => p.update());
+        addHatPixels(hatBaseX, hatBaseY, fontSize);
+    }
 
-            requestAnimationFrame(animate);
+    function addHatPixels(bx, by, size) {
+        const hatMap = [
+            [0,0,0,2,0,0,0,0],
+            [0,0,2,1,2,0,0,0],
+            [0,0,0,1,1,0,0,0],
+            [0,0,0,1,1,1,0,0],
+            [0,0,1,1,1,1,0,0],
+            [0,1,1,1,1,1,0,0],
+            [2,2,2,2,2,2,2,2],
+            [2,2,2,2,2,2,2,2]
+        ];
+
+        for(let r=0; r<hatMap.length; r++) {
+            for(let c=0; c<hatMap[r].length; c++) {
+                const val = hatMap[r][c];
+                if(val !== 0) {
+                    const pX = bx + (c * config.gap * 2); 
+                    const pY = by - (hatMap.length * config.gap * 2) + (r * config.gap * 2);
+                    
+                    const color = val === 1 ? '#FF2244' : '#FFFFFF';
+                    // Cluster for chunkiness
+                    particles.push(new Particle(pX, pY, color));
+                    particles.push(new Particle(pX+config.gap, pY, color));
+                    particles.push(new Particle(pX, pY+config.gap, color));
+                    particles.push(new Particle(pX+config.gap, pY+config.gap, color));
+                }
+            }
         }
+    }
 
-        window.addEventListener('resize', init);
+    function animate() {
+        ctx.fillStyle = 'rgba(5, 5, 16, 0.4)'; 
+        ctx.fillRect(0, 0, width, height);
 
-        // Start
-        init();
-        animate();
+        snowParticles.forEach(snow => snow.update());
+        particles.forEach(p => p.update());
 
-    </script>
+        requestAnimationFrame(animate);
+    }
+
+    window.addEventListener('resize', init);
+    
+    // Start
+    init();
+    animate();
+
+</script>
 </body>
-
 </html>
