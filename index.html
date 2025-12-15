@@ -3,7 +3,8 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Digicampus Holiday Pixel Art</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- crucial for mobile -->
+    <title>Digicampus Winter Wish</title>
     <style>
         body {
             margin: 0;
@@ -15,10 +16,100 @@
             align-items: center;
             height: 100vh;
             font-family: 'Courier New', Courier, monospace;
+            color: #00F0FF;
         }
 
         canvas {
             display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* UI Layer for Input and Wish */
+        #ui-layer {
+            position: relative;
+            z-index: 10;
+            text-align: center;
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+        }
+
+        /* Input Container */
+        #input-container {
+            background: rgba(5, 5, 16, 0.9);
+            border: 1px solid #00F0FF;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+            transition: opacity 0.5s ease;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: white;
+            font-weight: normal;
+        }
+
+        input[type="text"] {
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid #00F0FF;
+            color: white;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 20px;
+            padding: 10px;
+            text-align: center;
+            width: 80%;
+            margin-bottom: 30px;
+            outline: none;
+        }
+
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+        button {
+            background: #00F0FF;
+            color: #050510;
+            border: none;
+            padding: 12px 30px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: white;
+            box-shadow: 0 0 15px #00F0FF;
+        }
+
+        /* The Wish Display */
+        #wish-display {
+            display: none;
+            /* Hidden initially */
+            margin-top: 30vh;
+            /* Push it down below the canvas text */
+            font-size: 18px;
+            line-height: 1.6;
+            color: white;
+            text-shadow: 0 0 5px rgba(0, 240, 255, 0.5);
+            pointer-events: none;
+            /* Let clicks pass through to canvas */
+            opacity: 0;
+            transition: opacity 2s ease;
+            padding: 0 20px;
+        }
+
+        .highlight {
+            color: #00F0FF;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -27,13 +118,53 @@
 
     <canvas id="canvas"></canvas>
 
+    <div id="ui-layer">
+        <!-- Input Section -->
+        <div id="input-container">
+            <h1>Welcome to Digicampus</h1>
+            <input type="text" id="nameInput" placeholder="Enter your name" autocomplete="off">
+            <br>
+            <button onclick="revealWish()">Unlock Winter Wish</button>
+        </div>
+
+        <!-- Wish Section -->
+        <div id="wish-display"></div>
+    </div>
+
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
+        const uiLayer = document.getElementById('ui-layer');
+        const inputContainer = document.getElementById('input-container');
+        const wishDisplay = document.getElementById('wish-display');
 
         let particles = [];
         let snowParticles = [];
         let width, height;
+
+        // Pool of 20 Personal-ish Winter Wishes
+        const wishes = [
+            "Wishing you a season of recharging your biological batteries, {name}.",
+            "{name}, may your code be bug-free and your holidays stress-free.",
+            "Here’s to a new year of breakthrough insights and zero merge conflicts, {name}.",
+            "{name}, may your 2026 be as resilient and dynamic as a distributed network.",
+            "Wishing you connection, collaboration, and calm this winter, {name}.",
+            "{name}, may you find time to slow down and engineer some happiness this season.",
+            "Wishing you a prosperous new year with high uptime and low stress, {name}.",
+            "May your holidays be as bright as a well-optimized display, {name}.",
+            "{name}, sending you data-driven proof that you deserve a great break.",
+            "Wishing you a season of innovation and warm connections, {name}.",
+            "{name}, may your days be merry and your systems secure.",
+            "Here’s to unhurried moments and future-proof memories, {name}.",
+            "Wishing you clarity, purpose, and peace in the new year, {name}.",
+            "{name}, take this time to debug your mind and refresh your spirit.",
+            "May the new year bring you impactful projects and joyful pauses, {name}.",
+            "Wishing you a holiday season with optimal throughput of joy, {name}.",
+            "{name}, may your bandwidth for happiness be unlimited this year.",
+            "Here’s to smart solutions and warm traditions, {name}.",
+            "Wishing you a sustainable and scalable year of success, {name}.",
+            "{name}, may you upgrade your downtime this holiday season."
+        ];
 
         // Configuration
         const config = {
@@ -52,7 +183,45 @@
             mouse.y = e.y;
         });
 
-        // 1. Class for the Text Pixels
+        // Also handle touch for mobile
+        window.addEventListener('touchmove', (e) => {
+            mouse.x = e.touches[0].clientX;
+            mouse.y = e.touches[0].clientY;
+        });
+
+        // --- UI LOGIC ---
+        function revealWish() {
+            const nameInput = document.getElementById('nameInput');
+            let name = nameInput.value.trim();
+
+            if (!name) name = "Friend"; // Fallback if empty
+
+            // 1. Hide Input
+            inputContainer.style.opacity = '0';
+            setTimeout(() => {
+                inputContainer.style.display = 'none';
+            }, 500);
+
+            // 2. Select Random Wish
+            const randomIndex = Math.floor(Math.random() * wishes.length);
+            let selectedWish = wishes[randomIndex];
+
+            // 3. Personalize
+            selectedWish = selectedWish.replace("{name}", `<span class="highlight">${name}</span>`);
+
+            // 4. Display Wish
+            wishDisplay.innerHTML = selectedWish;
+            wishDisplay.style.display = 'block';
+
+            // Small delay for drama before fading in
+            setTimeout(() => {
+                wishDisplay.style.opacity = '1';
+            }, 600);
+        }
+
+
+        // --- CANVAS LOGIC ---
+
         class Particle {
             constructor(x, y, color) {
                 this.x = Math.random() * width; // Start scattered
@@ -101,7 +270,7 @@
 
                 // Friction
                 this.vx *= this.friction;
-                this.vy *= this.friction; // slightly less friction for floaty feel
+                this.vy *= this.friction;
 
                 // Slight organic shimmer
                 if (Math.random() > 0.98) {
@@ -112,7 +281,6 @@
             }
         }
 
-        // 2. Class for Snow
         class Snow {
             constructor() {
                 this.reset();
@@ -135,7 +303,7 @@
                 }
 
                 ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-                ctx.fillRect(this.x, this.y, this.size, this.size); // Square snow for pixel theme
+                ctx.fillRect(this.x, this.y, this.size, this.size);
             }
         }
 
@@ -151,14 +319,15 @@
             }
 
             // Setup Text Scan
-            // We draw text to an offscreen position, scan the pixels, then clear it.
             ctx.fillStyle = 'white';
-            const fontSize = Math.min(width / 8, 150); // Responsive font size
+            // Responsive font: slightly smaller to ensure fit on mobile
+            const fontSize = Math.min(width / 8, 120);
             ctx.font = `900 ${fontSize}px Arial`;
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
 
-            config.textBaseY = height / 2;
+            // Move text UP slightly to make room for the wish below
+            config.textBaseY = height * 0.4;
 
             // Draw standard text to scan
             ctx.fillText(config.text, width / 2, config.textBaseY);
@@ -166,7 +335,7 @@
             // Scan the canvas
             const imageData = ctx.getImageData(0, 0, width, height);
             const data = imageData.data;
-            ctx.clearRect(0, 0, width, height); // Clean up
+            ctx.clearRect(0, 0, width, height);
 
             // Iterate through pixel data
             for (let y = 0; y < height; y += config.gap) {
@@ -180,32 +349,26 @@
                 }
             }
 
-            // Manually Add the Hat pixels relative to the 'D'
-            // We estimate the position of the first letter
+            // Add Hat
             const textWidth = ctx.measureText(config.text).width;
             const startX = (width / 2) - (textWidth / 2);
-            const hatBaseX = startX + (fontSize * 0.1); // Shift slightly right on the D
-            const hatBaseY = config.textBaseY - (fontSize * 0.35); // Top of the D
+            const hatBaseX = startX + (fontSize * 0.1);
+            const hatBaseY = config.textBaseY - (fontSize * 0.35);
 
             addHatPixels(hatBaseX, hatBaseY, fontSize);
         }
 
         function addHatPixels(bx, by, size) {
-            const pixelScale = config.gap;
-
-            // Simple Hat Map (1 = Red, 2 = White)
             const hatMap = [
                 [0, 0, 0, 2, 0, 0, 0, 0],
-                [0, 0, 2, 1, 2, 0, 0, 0], // Pom-pom
+                [0, 0, 2, 1, 2, 0, 0, 0],
                 [0, 0, 0, 1, 1, 0, 0, 0],
                 [0, 0, 0, 1, 1, 1, 0, 0],
                 [0, 0, 1, 1, 1, 1, 0, 0],
                 [0, 1, 1, 1, 1, 1, 0, 0],
-                [2, 2, 2, 2, 2, 2, 2, 2], // Brim
+                [2, 2, 2, 2, 2, 2, 2, 2],
                 [2, 2, 2, 2, 2, 2, 2, 2]
             ];
-
-            const scale = size / 200; // Scale hat based on font size
 
             for (let r = 0; r < hatMap.length; r++) {
                 for (let c = 0; c < hatMap[r].length; c++) {
@@ -215,7 +378,7 @@
                         const pY = by - (hatMap.length * config.gap * 2) + (r * config.gap * 2);
 
                         const color = val === 1 ? '#FF2244' : '#FFFFFF';
-                        // Add a cluster of 4 pixels to make it chunky
+                        // Cluster for chunkiness
                         particles.push(new Particle(pX, pY, color));
                         particles.push(new Particle(pX + config.gap, pY, color));
                         particles.push(new Particle(pX, pY + config.gap, color));
@@ -226,14 +389,10 @@
         }
 
         function animate() {
-            // Create trails for "tech" feel
             ctx.fillStyle = 'rgba(5, 5, 16, 0.4)';
             ctx.fillRect(0, 0, width, height);
 
-            // Update Snow
             snowParticles.forEach(snow => snow.update());
-
-            // Update Text
             particles.forEach(p => p.update());
 
             requestAnimationFrame(animate);
